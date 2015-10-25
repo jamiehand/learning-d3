@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- meta: needed to ensure that the browser can 
+        parse D3’s functions and data properly -->
+        <meta charset="utf-8">
+        <title>D3 things!</title>
+        <!-- this script tag: locates d3 in d3 directory -->
+        <script type="text/javascript" src="../d3/d3.js"></script>
+    </head>
+    <body>
+        <!-- this script tag: where I key in my d3 code -->
+        <script type="text/javascript">
+            d3.select("body").append("p").text("New paragraph!");
+            var dataset = [5,10,15,20,25,30];
+            d3.select("body").selectAll("p")
+                .data(dataset)
+                .enter()
+                .append("p")
+                .text(function(d) {
+                    return "I can count up to " + d;
+                })
+                .style("color", function(d) {
+                    if (d > 15) {   //Threshold of 15
+                        return "red";
+                    } else {
+                        return "black";
+                    }
+                });
+        </script>
+    </body>
+</html>
