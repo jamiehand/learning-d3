@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- meta: needed to ensure that the browser can 
+        parse D3’s functions and data properly -->
+        <meta charset="utf-8">
+        <title>Ch. 9 - barchart</title>
+        <!-- this script tag: locates d3 in d3 directory -->
+        <script type="text/javascript" src="../d3/d3.js"></script>
+    </head>
+    <body>
+        <p>Click on this text to update the chart with new 
+            data values.</p>
+        <!-- this script tag: where I key in my d3 code -->
+        <script type="text/javascript">
+            var dataset = [ 5,  10, 13, 19, 21, 25, 15, 
+                            22, 18, 15, 13, 11, 12, 18, 
+                            22, 18, 15, 13, 17, 20 ];
+            //Width and height
+            var w = 600;
+            var h = 250;
+            var barPadding = 3;
+
+            // new
+            var xScale = d3.scale.ordinal()
+                           // e.g. dataset.length --> 4
+                           // d3.range(20) --> [0, 1, 2, 3]
+                           // domain([0, 1, 2, 3]) --> 
+                           //   sets domain of ordinal scale
+                           // (note: ordinal values are usually nonnumeric)
+                           .domain(d3.range(dataset.length))
+                           // rangeBands: takes a low and high value, and 
+                           // automatically divides it into even chunks or 
+                           // “bands,” based on the length of the domain
+                           .rangeRoundBands([0, w], 0.05);
+
+            // new
+            var yScale = d3.scale.linear()
+                           .domain([0, d3.max(dataset)])
+                           .range([0, h]);
+
+            var svg = d3.select("body").append("svg");
+            svg.attr("width", w)
+               .attr("height", h);
+            svg.selectAll("rect")
+               .data(dataset)
+               .enter()
+               .append("rect")
+               .attr("x", function(d, i) {
+                   // return i * (w / dataset.length); 
+                   return xScale(i);  // change from above 
+               })
+               .attr("y", function(d) {
+                   return h - yScale(d); 
+                   // height minus data value
+               })
+               .attr("width", xScale.rangeBand())
+               //.attr("width", w / dataset.length - barPadding)
+               .attr("height", function(d) {
+                   // return d * 4;
+                   return yScale(d);
+               })
+               .attr("fill", function(d) {
+                   return "rgb(0,200,"+ (d*10) +")";
+               });
+
+            // create labels
+            svg.selectAll("text")
+               .data(dataset)
+               .enter()
+               .append("text")
+               .text(function(d) {
+                   return d;
+               })
+               .attr("text-anchor", "middle")
+               .attr("x", function(d, i) {
+                    // return i * (w / dataset.length) + (w / dataset.length - barPadding) / 2;
+                    return xScale(i) + xScale.rangeBand() / 2;
+                })
+               .attr("y", function(d) {
+                    return h - yScale(d) + 14;
+               })
+               .attr("font-family", "sans-serif")
+               .attr("font-size", "11px")
+               .attr("fill", "white");
+
+            d3.select("p")
+              .on("click", function() {
+                // New values for dataset
+                var numValues = dataset.length; 
+                dataset = [];    
+                var maxValue = 25;
+                for (var i = 0; i < numValues; i++) { 
+                    //New random integer (0-24)
+                    var newNumber = Math.floor(Math.random() * maxValue); 
+                    dataset.push(newNumber);  //Add new number to array
+                }
+                var newNumber = Math.floor(Math.random() * maxValue);
+                dataset.push(newNumber);
+
+                /* The range can stay the same (as the visual size of our chart isn’t changing), but after the new dataset has been generated, we should update the scale’s domain */
+                yScale.domain([0, d3.max(dataset)]);
+                xScale.domain(d3.range(dataset.length));
+
+                // Update all rects
+                var bars = svg.selectAll("rect")
+                    // rebind data to existing bars; return 
+                    // 'update' selection
+                              .data(dataset); 
+
+
+                // Enter...
+                bars.enter()  // references 'enter' selection (subset
+                              // of 'update' selection)
+                    .append("rect")
+                    .attr("x", w) // x of rect to beyond far edge of 
+                        // svg - so it transitions in w/ 
+                        // bars.transition()
+                    .attr("y", function(d) {
+                        return h - yScale(d); // y from updated yScale
+                    })
+                    .attr("width", xScale.rangeBand())
+                    .attr("height", function(d) {
+                        return yScale(d);
+                    })
+                    .attr("fill", function(d) {
+                        return "rgb(0,200," + (d * 10) + ")";
+                    });
+
+
+                // Update...
+                bars.transition()
+                    .delay(function(d, i) {
+                         return i / dataset.length * 100;
+                    })
+                    .duration(1000)
+                    .attr("x", function(d, i) {
+                        return xScale(i);
+                    }) // update x b/c adding bar
+                    .attr("y", function(d) {
+                        return h - yScale(d);
+                    }) 
+                    .attr("width", xScale.rangeBand()) // update
+                        // width b/c adding bar
+                    .attr("height", function(d) {
+                        return yScale(d)
+                    })
+                    .attr("fill", function(d) {
+                        return "rgb(0,200,"+ (d*10) +")";
+                    });
+
+            labels = svg.selectAll("text")
+                        .data(dataset);
+
+            labels.enter()                
+                  .append("text")
+                  .text(function(d) {
+                          return d;
+                  })
+                  .attr("text-anchor", "middle")
+                  .attr("x", w)
+                  .attr("y", function(d) {
+                       return h - yScale(d) + 14;
+                  })
+                 .attr("font-family", "sans-serif")
+                 .attr("font-size", "11px")
+                 .attr("fill", "white");
+
+
+            labels.transition()
+                .delay(function(d, i) {
+                        return i / dataset.length * 100;
+                   })
+               .duration(1000)
+               .text(function(d) {
+                   return d;
+               })
+               .attr("x", function(d, i) {
+                   return xScale(i) + xScale.rangeBand() / 2;
+               })
+               .attr("y", function(d) {
+                   return h - yScale(d) + 14;
+               });
+
+            });
+        </script>
+    </body>
+</html>
