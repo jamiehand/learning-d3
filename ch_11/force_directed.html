@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- meta: needed to ensure that the browser can 
+        parse D3’s functions and data properly -->
+        <meta charset="utf-8">
+        <title>D3 Page Template</title>
+        <!-- this script tag: locates d3 in d3 directory -->
+        <script type="text/javascript" src="../d3/d3.js"></script>
+        <style type="text/css">
+            text {
+                font-family: sans-serif;
+                font-size: 12px;
+                fill: white;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- this script tag: where I key in my d3 code -->
+        <script type="text/javascript">
+            // width, height
+            var w = 300;
+            var h = 300;
+
+            // make svg element
+            var svg = d3.select("body")
+                        .append("svg")
+                        .attr("width", w)
+                        .attr("height", h);
+
+            // get colors from 10-step ordinal scale
+            var colors = d3.scale.category10();
+
+            // provide nodes and edges separately
+            var dataset = {
+                    nodes: [
+                            { name: "Adam" },
+                            { name: "Bob" },
+                            { name: "Carrie" },
+                            { name: "Donovan" },
+                            { name: "Edward" },
+                            { name: "Felicity" },
+                            { name: "George" },
+                            { name: "Hannah" },
+                            { name: "Iris" },
+                            { name: "Jerry" }
+                    ],
+                    edges: [
+                            { source: 0, target: 1 },
+                            { source: 0, target: 2 },
+                            { source: 0, target: 3 },
+                            { source: 0, target: 4 },
+                            { source: 1, target: 5 },
+                            { source: 2, target: 5 },
+                            { source: 2, target: 5 },
+                            { source: 3, target: 4 },
+                            { source: 5, target: 8 },
+                            { source: 5, target: 9 },
+                            { source: 6, target: 7 },
+                            { source: 7, target: 8 },
+                            { source: 8, target: 9 }
+                    ]
+            };
+
+            var force = d3.layout.force()
+                     .nodes(dataset.nodes)
+                     .links(dataset.edges)
+                     .size([w, h])
+                     .linkDistance([50]) // longer edges
+                     .charge([-100]) // more neg charge -> repel more
+                     .start();
+
+            // svg line for each edge
+            var edges = svg.selectAll("line")
+                    .data(dataset.edges)
+                    .enter()
+                    .append("line")
+                    .style("stroke", "#ccc")
+                    .style("stroke-width", 1);
+
+            // svg circle for each node
+            var nodes = svg.selectAll("circle")
+                    .data(dataset.nodes)
+                    .enter()
+                    .append("circle")
+                    .attr("r", 10)
+                    .style("fill", function(d, i) {
+                            return colors(i);
+                    })
+                    .call(force.drag);
+
+
+            // tell d3: every time you tick, take the new x/y values 
+            // for each line and circle and update them in the DOM.
+            force.on("tick", function() {
+
+            edges.attr("x1", function(d) { return d.source.x; })
+                 .attr("y1", function(d) { return d.source.y; })
+                 .attr("x2", function(d) { return d.target.x; })
+                 .attr("y2", function(d) { return d.target.y; });
+
+            nodes.attr("cx", function(d) { return d.x; })
+                 .attr("cy", function(d) { return d.y; });
+
+            });
+
+
+        </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+

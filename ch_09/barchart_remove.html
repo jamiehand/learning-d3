@@ -64,7 +64,7 @@
             // new
             var yScale = d3.scale.linear()
                            .domain([0, 
-                                    d3.max(function(d) {
+                                    d3.max(dataset, function(d) {
                                       return d.value;
                                     })])
                            .range([0, h]);
@@ -72,6 +72,7 @@
             var svg = d3.select("body").append("svg");
             svg.attr("width", w)
                .attr("height", h);
+
             svg.selectAll("rect")
                .data(dataset, key)
                .enter()
@@ -116,6 +117,12 @@
 
             d3.select("p")
               .on("click", function() {
+
+// **** TODO why is this taking all the bars off of the screen? **
+// Compare to data_join_with_key
+
+                dataset.shift(); // remove one value
+
                 // New values for dataset
                 var numValues = dataset.length; 
                 dataset = [];    
@@ -124,7 +131,7 @@
                     var newNumber = Math.floor(Math.random() * maxValue); 
                     dataset.push(newNumber);
                 }
-                dataset.shift(); // remove one value
+                
 
                 /* The range can stay the same (as the visual size of our chart isn’t changing), but after the new dataset has been generated, we should update the scale’s domain */
                 // yScale.domain([0, d3.max(dataset)]);
@@ -138,13 +145,20 @@
                     // 'update' selection
                               .data(dataset, key); 
 
-
-                // Enter...
-                bars.exit() 
-                    .transition()
-                    .duration(500)
-                    .attr("x", -xScale.rangeBand())  // <-- Exit stage left
-                    .remove();
+                //Enter...
+                bars.enter()
+                  .append("rect")
+                  .attr("x", w)
+                  .attr("y", function(d) {
+                    return h - yScale(d.value);
+                  })
+                  .attr("width", xScale.rangeBand())
+                  .attr("height", function(d) {
+                    return yScale(d.value);
+                  })
+                  .attr("fill", function(d) {
+                    return "rgb(0, 0, " + (d.value * 10) + ")";
+                  });
 
                 // Update...
                 bars.transition()
@@ -166,6 +180,14 @@
                     .attr("fill", function(d) {
                         return "rgb(0,200,"+ (d.value*10) +")";
                     });
+
+                // Exit...
+                bars.exit() 
+                    .transition()
+                    .duration(500)
+                    .attr("x", -xScale.rangeBand())  // <-- Exit stage left
+                    .remove();
+
 
             labels = svg.selectAll("text")
                         .data(dataset, key);
