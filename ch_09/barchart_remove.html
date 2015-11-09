@@ -41,6 +41,8 @@
             var h = 250;
             var barPadding = 3;
 
+            var maxValue = 25;
+
             // define a key function, to be used whenever we bind 
             // data to elements. This function specifies to take the key value 
             // of whatever d object is passed into it.
@@ -63,10 +65,7 @@
 
             // new
             var yScale = d3.scale.linear()
-                           .domain([0, 
-                                    d3.max(dataset, function(d) {
-                                      return d.value;
-                                    })])
+                           .domain([0, maxValue])
                            .range([0, h]);
 
             var svg = d3.select("body").append("svg");
@@ -125,24 +124,29 @@
 
                 // New values for dataset
                 var numValues = dataset.length; 
-                dataset = [];    
-                var maxValue = 25;
+                // dataset = [];    
                 for (var i = 0; i < numValues; i++) { 
                     var newNumber = Math.floor(Math.random() * maxValue); 
-                    dataset.push(newNumber);
+                    // gets the thing at *index* i (not key)
+                    dataset[i].value=newNumber;
+                  //key becomes the unique identifier
                 }
                 
+                console.log(dataset);
 
                 /* The range can stay the same (as the visual size of our chart isn’t changing), but after the new dataset has been generated, we should update the scale’s domain */
                 // yScale.domain([0, d3.max(dataset)]);
-                yScale.domain([0, 
-                  d3.max(dataset, function(d) { return d.value; }) ]);
+
+                // yScale.domain([0, 
+                //   d3.max(dataset, function(d) { return d.value; }) ]);
                 xScale.domain(d3.range(dataset.length));
 
                 // Update all rects
                 var bars = svg.selectAll("rect")
                     // rebind data to existing bars; return 
                     // 'update' selection
+                              // dataset, how to extract unique 
+                              // identifier from dataset
                               .data(dataset, key); 
 
                 //Enter...
