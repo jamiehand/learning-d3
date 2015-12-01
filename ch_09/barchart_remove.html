@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- meta: needed to ensure that the browser can 
+        <!-- meta: needed to ensure that the browser can
         parse D3’s functions and data properly -->
         <meta charset="utf-8">
         <title>Ch. 9 - barchart</title>
@@ -12,9 +12,9 @@
         <p>Click on this text to remove a data value.</p>
         <!-- this script tag: where I key in my d3 code -->
         <script type="text/javascript">
-        // hard brackets [] indicate an array, and 
+        // hard brackets [] indicate an array, and
         // curly brackets {} indicate an object.
-            var dataset = [ 
+            var dataset = [
                 { key: 0, value: 5 },
                 { key: 1, value: 10 },
                 { key: 2, value: 13 },
@@ -35,6 +35,20 @@
                 { key: 17, value: 18 },
                 { key: 18, value: 23 },
                 { key: 19, value: 25 } ];
+                // This shows how to extract data from an array of objects.
+                // But this doesn't allow fast access to the keys.
+                // Advantage to doing it this way: D3 understands it
+                // (understands separate )
+                // But objects already are an associative array.
+                // I can just use one object to store my data.
+                // But *if* I had an object where it wasn't just an array
+                // I'll essentially construct this when I do my visualization
+                // (implicitly or explicitly).
+                // Any time I have things with a fixed schema, I can put them
+                // into an array/list --> be able to do same thing to every
+                // object.
+                // This refactors an object into a list of key-value pairs.
+
 
             //Width and height
             var w = 600;
@@ -43,8 +57,8 @@
 
             var maxValue = 25;
 
-            // define a key function, to be used whenever we bind 
-            // data to elements. This function specifies to take the key value 
+            // define a key function, to be used whenever we bind
+            // data to elements. This function specifies to take the key value
             // of whatever d object is passed into it.
             var key = function(d) {
                 return d.key;
@@ -54,12 +68,12 @@
             var xScale = d3.scale.ordinal()
                            // e.g. dataset.length --> 4
                            // d3.range(20) --> [0, 1, 2, 3]
-                           // domain([0, 1, 2, 3]) --> 
+                           // domain([0, 1, 2, 3]) -->
                            //   sets domain of ordinal scale
                            // (note: ordinal values are usually nonnumeric)
                            .domain(d3.range(dataset.length))
-                           // rangeBands: takes a low and high value, and 
-                           // automatically divides it into even chunks or 
+                           // rangeBands: takes a low and high value, and
+                           // automatically divides it into even chunks or
                            // “bands,” based on the length of the domain
                            .rangeRoundBands([0, w], 0.05);
 
@@ -77,11 +91,11 @@
                .enter()
                .append("rect")
                .attr("x", function(d, i) {
-                   // return i * (w / dataset.length); 
-                   return xScale(i);  // change from above 
+                   // return i * (w / dataset.length);
+                   return xScale(i);  // change from above
                })
                .attr("y", function(d) {
-                   return h - yScale(d.value); 
+                   return h - yScale(d.value);
                    // height minus data value
                })
                .attr("width", xScale.rangeBand())
@@ -123,31 +137,31 @@
                 dataset.shift(); // remove one value
 
                 // New values for dataset
-                var numValues = dataset.length; 
-                // dataset = [];    
-                for (var i = 0; i < numValues; i++) { 
-                    var newNumber = Math.floor(Math.random() * maxValue); 
+                var numValues = dataset.length;
+                // dataset = [];
+                for (var i = 0; i < numValues; i++) {
+                    var newNumber = Math.floor(Math.random() * maxValue);
                     // gets the thing at *index* i (not key)
                     dataset[i].value=newNumber;
                   //key becomes the unique identifier
                 }
-                
+
                 console.log(dataset);
 
                 /* The range can stay the same (as the visual size of our chart isn’t changing), but after the new dataset has been generated, we should update the scale’s domain */
                 // yScale.domain([0, d3.max(dataset)]);
 
-                // yScale.domain([0, 
+                // yScale.domain([0,
                 //   d3.max(dataset, function(d) { return d.value; }) ]);
                 xScale.domain(d3.range(dataset.length));
 
                 // Update all rects
                 var bars = svg.selectAll("rect")
-                    // rebind data to existing bars; return 
+                    // rebind data to existing bars; return
                     // 'update' selection
-                              // dataset, how to extract unique 
+                              // dataset, how to extract unique
                               // identifier from dataset
-                              .data(dataset, key); 
+                              .data(dataset, key);
 
                 //Enter...
                 bars.enter()
@@ -175,7 +189,7 @@
                     }) // update x b/c adding bar
                     .attr("y", function(d) {
                         return h - yScale(d.value);
-                    }) 
+                    })
                     .attr("width", xScale.rangeBand()) // update
                         // width b/c adding bar
                     .attr("height", function(d) {
@@ -186,7 +200,7 @@
                     });
 
                 // Exit...
-                bars.exit() 
+                bars.exit()
                     .transition()
                     .duration(500)
                     .attr("x", -xScale.rangeBand())  // <-- Exit stage left
@@ -196,7 +210,7 @@
             labels = svg.selectAll("text")
                         .data(dataset, key);
 
-            labels.exit()                
+            labels.exit()
                     .transition()
                     .duration(500)
                     .attr("x", -xScale.rangeBand())  // <-- Exit stage left
